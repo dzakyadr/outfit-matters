@@ -1,37 +1,53 @@
 "use client";
 
-interface TypingIndicatorProps {
-  show: boolean;
-}
-
-export default function TypingIndicator({ show }: TypingIndicatorProps) {
+export default function TypingIndicator({ show }: { show: boolean }) {
   if (!show) return null;
 
   return (
-    <div className="flex items-center gap-3 px-1">
-      {/* Small avatar */}
+    <div className="flex items-start gap-3" style={{ marginBottom: "14px" }}>
+      {/* Avatar */}
       <div
-        className="w-7 h-7 rounded-full flex-shrink-0 overflow-hidden border border-[rgba(201,168,76,0.3)]"
-        style={{ background: "rgba(201,168,76,0.1)" }}
+        className="flex items-center justify-center flex-shrink-0"
+        style={{
+          width: 28,
+          height: 28,
+          borderRadius: "50%",
+          border: "1px solid rgba(238,238,238,0.15)",
+          background: "rgba(238,238,238,0.04)",
+          fontFamily: "var(--font-inter)",
+          fontSize: "10px",
+          fontWeight: 500,
+          color: "rgba(238,238,238,0.6)",
+        }}
       >
-        <img
-          src="/nandra/nandra-avatar.png"
-          alt="NANDRA"
-          className="w-full h-full object-cover"
-        />
+        N
       </div>
 
       {/* Dots */}
-      <div className="flex items-center gap-1.5 px-4 py-3 rounded-2xl rounded-tl-sm"
+      <div
+        className="flex items-center gap-1.5"
         style={{
-          background: "rgba(245,240,232,0.04)",
-          border: "1px solid rgba(245,240,232,0.1)",
-          borderLeft: "3px solid #C9A84C",
+          padding: "12px 14px",
+          background: "rgba(238,238,238,0.04)",
+          border: "1px solid rgba(238,238,238,0.1)",
+          borderRadius: "2px 10px 10px 10px",
+          minWidth: 52,
         }}
       >
-        <span className="w-2 h-2 rounded-full bg-[#C9A84C] dot-bounce" />
-        <span className="w-2 h-2 rounded-full bg-[#C9A84C] dot-bounce" />
-        <span className="w-2 h-2 rounded-full bg-[#C9A84C] dot-bounce" />
+        {[0, 1, 2].map((i) => (
+          <span
+            key={i}
+            style={{
+              display: "inline-block",
+              width: 5,
+              height: 5,
+              borderRadius: "50%",
+              background: "rgba(238,238,238,0.4)",
+              animation: "typingPulse 0.9s ease infinite",
+              animationDelay: `${i * 0.2}s`,
+            }}
+          />
+        ))}
       </div>
     </div>
   );

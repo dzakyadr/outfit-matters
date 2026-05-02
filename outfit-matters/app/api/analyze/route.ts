@@ -2,14 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
 
-// Models tried in order until one succeeds
-// Priority: best vision quality → reliable fallbacks → auto-router last resort
+// Models verified live via OpenRouter /api/v1/models — vision capable, free tier
 const MODELS = [
-  "qwen/qwen2.5-vl-72b-instruct:free",       // Strong vision, usually available
-  "qwen/qwen2.5-vl-32b-instruct:free",       // Good vision fallback
-  "google/gemma-3-27b-it:free",              // Google, vision capable
-  "mistralai/mistral-small-3.1-24b-instruct:free", // Mistral vision
-  "meta-llama/llama-3.2-11b-vision-instruct:free", // Llama vision
+  "google/gemma-4-31b-it:free",
+  "nvidia/nemotron-nano-12b-v2-vl:free",
+  "google/gemma-3-27b-it:free",
+  "google/gemma-3-12b-it:free",
+  "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
 ];
 
 const SYSTEM_PROMPT = `You are NANDRA, a brutally honest and dramatically funny fashion critic who acts like a best friend texting you.
@@ -38,14 +37,9 @@ All text must be in English.`;
 
 interface OpenRouterResponse {
   choices?: Array<{
-    message?: {
-      content?: string;
-    };
+    message?: { content?: string };
   }>;
-  error?: {
-    message?: string;
-    code?: number;
-  };
+  error?: { message?: string; code?: number };
 }
 
 async function callModel(base64Image: string, model: string): Promise<string> {
@@ -65,14 +59,9 @@ async function callModel(base64Image: string, model: string): Promise<string> {
           content: [
             {
               type: "image_url",
-              image_url: {
-                url: `data:image/jpeg;base64,${base64Image}`,
-              },
+              image_url: { url: `data:image/jpeg;base64,${base64Image}` },
             },
-            {
-              type: "text",
-              text: SYSTEM_PROMPT,
-            },
+            { type: "text", text: SYSTEM_PROMPT },
           ],
         },
       ],
@@ -83,86 +72,65 @@ async function callModel(base64Image: string, model: string): Promise<string> {
 
   const data: OpenRouterResponse = await response.json();
 
-  // Check for API-level errors (returned in body even with 200 status)
-  if (data.error) {
-    throw new Error(`Model error from ${model}: ${data.error.message}`);
-  }
-
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status} from ${model}`);
-  }
+  if (data.error) throw new Error(`${model}: ${data.error.message}`);
+  if (!response.ok) throw new Error(`HTTP ${response.status} from ${model}`);
 
   const content = data.choices?.[0]?.message?.content;
-  if (!content || content.trim() === "") {
-    throw new Error(`Empty response from ${model}`);
-  }
+  if (!content || content.trim() === "") throw new Error(`Empty response from ${model}`);
 
   return content;
 }
 
 function parseResponse(raw: string): Record<string, string> {
-  // Strip markdown code fences if present
-  const cleaned = raw
-    .replace(/```json\s*/gi, "")
-    .replace(/```\s*/gi, "")
-    .trim();
-
+  let cleaned = raw.trim();
+  const startIndex = cleaned.indexOf("{");
+  const endIndex = cleaned.lastIndexOf("}");
+  if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
+    cleaned = cleaned.substring(startIndex, endIndex + 1);
+  } else {
+    throw new Error("No JSON object found in response");
+  }
   const parsed = JSON.parse(cleaned);
-
-  // Validate all required fields exist
   const required = ["bubble1", "bubble2", "bubble3", "bubble4", "bubble5"];
   for (const key of required) {
     if (!parsed[key] || typeof parsed[key] !== "string") {
-      throw new Error(`Missing or invalid field: ${key}`);
+      throw new Error(`Missing field: ${key}`);
     }
   }
-
   return parsed;
 }
 
 export async function POST(req: NextRequest) {
   try {
     if (!process.env.OPENROUTER_API_KEY) {
-      console.error("OPENROUTER_API_KEY is not set");
-      return NextResponse.json(
-        { error: "API key not configured" },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: "API key not configured" }, { status: 500 });
     }
 
     const body = await req.json();
     const { image } = body;
 
     if (!image || typeof image !== "string") {
-      return NextResponse.json(
-        { error: "No image provided" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "No image provided" }, { status: 400 });
     }
 
-    // Try each model in order until one works
     let lastError: Error | null = null;
     for (const model of MODELS) {
       try {
         console.log(`Trying model: ${model}`);
         const raw = await callModel(image, model);
         const parsed = parseResponse(raw);
-        console.log(`Success with model: ${model}`);
+        console.log(`Success with: ${model}`);
         return NextResponse.json(parsed);
       } catch (err) {
         lastError = err instanceof Error ? err : new Error(String(err));
-        console.warn(`Model ${model} failed:`, lastError.message);
-        // Continue to next model
+        console.warn(`Failed: ${lastError.message}`);
       }
     }
 
-    // All models failed
     throw lastError ?? new Error("All models failed");
 
   } catch (error) {
     console.error("Analyze API error:", error);
-
-    // Return a graceful NANDRA voice error so UI always shows something
     return NextResponse.json({
       bubble1: "okay something went wrong on my end... try again? and maybe reconsider the outfit while you wait 💀",
       bubble2: "error: 404 fashion sense not found (on MY end this time, not yours)",

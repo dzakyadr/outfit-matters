@@ -1,15 +1,14 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #0A0A0A;
-  --text: #F5F0E8;
-  --gold: #C9A84C;
-  --gold-dim: rgba(201, 168, 76, 0.2);
-  --green: #7D9B76;
-  --red: #C0392B;
-  --muted: rgba(245, 240, 232, 0.4);
-  --border: rgba(245, 240, 232, 0.1);
-  --bubble-bg: rgba(245, 240, 232, 0.04);
+  --bg: #080808;
+  --text: #EEEEEE;
+  --muted: rgba(238, 238, 238, 0.35);
+  --very-muted: rgba(238, 238, 238, 0.2);
+  --border: rgba(238, 238, 238, 0.08);
+  --border-hover: rgba(238, 238, 238, 0.25);
+  --surface: rgba(238, 238, 238, 0.04);
+  --surface-chat: rgba(238, 238, 238, 0.04);
 }
 
 * {
@@ -21,98 +20,41 @@
 html, body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-inter), sans-serif;
   scroll-behavior: smooth;
   min-height: 100vh;
 }
 
 /* Scrollbar */
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: #0A0A0A; }
-::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 2px; }
+::-webkit-scrollbar { width: 2px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(238, 238, 238, 0.15); }
 
 /* Animations */
 @keyframes fadeSlideUp {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes blink {
+@keyframes typingPulse {
   0%, 100% { opacity: 0.2; }
-  50% { opacity: 1; }
+  50%       { opacity: 0.8; }
 }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-8px); }
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
-@keyframes shimmer {
-  0% { background-position: -200% center; }
-  100% { background-position: 200% center; }
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes pulse-gold {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(201, 168, 76, 0.4); }
-  50% { box-shadow: 0 0 0 8px rgba(201, 168, 76, 0); }
-}
-
-.animate-fade-slide-up {
-  animation: fadeSlideUp 0.5s ease forwards;
-}
-
-.animate-float {
-  animation: float 3s ease-in-out infinite;
-}
-
-.dot-bounce {
-  animation: blink 1.2s ease-in-out infinite;
-}
-.dot-bounce:nth-child(2) { animation-delay: 0.2s; }
-.dot-bounce:nth-child(3) { animation-delay: 0.4s; }
-
-/* Upload zone */
-.upload-zone {
-  border: 2px dashed var(--border);
-  transition: all 0.3s ease;
-}
-.upload-zone:hover, .upload-zone.drag-over {
-  border-color: var(--gold);
-  background: var(--gold-dim);
-}
-
-/* Gold CTA button */
-.btn-gold {
-  background: var(--gold);
-  color: #0A0A0A;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  transition: all 0.2s ease;
-}
-.btn-gold:hover {
-  background: #d4b05a;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 20px rgba(201, 168, 76, 0.4);
-}
-.btn-gold:active { transform: translateY(0); }
-
-/* Chat bubble */
-.chat-bubble {
-  background: var(--bubble-bg);
-  border: 1px solid var(--border);
-  border-left: 3px solid var(--gold);
-  opacity: 0;
-}
-.chat-bubble.visible {
-  animation: fadeSlideUp 0.5s ease forwards;
-}
-
-/* Gold shimmer text */
-.text-gold-shimmer {
-  background: linear-gradient(90deg, var(--gold), #f0d080, var(--gold));
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: shimmer 3s linear infinite;
-}
+/* Page load animation classes */
+.anim-navbar   { animation: fadeIn   0.3s ease both; animation-delay: 0s; }
+.anim-headline { animation: slideUp  0.5s ease both; animation-delay: 0.15s; }
+.anim-nandra   { animation: slideUp  0.5s ease both; animation-delay: 0.3s; }
+.anim-bubble   { animation: fadeIn   0.3s ease both; animation-delay: 0.55s; }
+.anim-columns  { animation: fadeIn   0.4s ease both; animation-delay: 0.5s; }
+.anim-chat     { animation: fadeSlideUp 0.35s ease both; }

@@ -1,75 +1,79 @@
 "use client";
 
+import { useState, useEffect } from "react";
+
 const SPEECH_BUBBLES = [
-  "okay so... you uploaded this. bold.",
+  "upload your fit. i won't lie to you.",
   "drop the fit. i have thoughts.",
   "go ahead. i promise i'll be gentle. (i won't.)",
-  "no judgment zone. lol jk.",
   "upload it. worst case you learn something.",
 ];
 
-function getRandomQuip() {
-  return SPEECH_BUBBLES[Math.floor(Math.random() * SPEECH_BUBBLES.length)];
-}
+export default function NandraCharacter({ hideSpeech = false, pose = "hi" }: { hideSpeech?: boolean, pose?: "hi" | "thinking" | "laughing" }) {
+  const [quip, setQuip] = useState(SPEECH_BUBBLES[0]);
+  const [mounted, setMounted] = useState(false);
 
-export default function NandraCharacter() {
-  const quip = getRandomQuip();
+  useEffect(() => {
+    setMounted(true);
+    setQuip(SPEECH_BUBBLES[Math.floor(Math.random() * SPEECH_BUBBLES.length)]);
+  }, []);
+
+  const getImageSrc = () => {
+    switch (pose) {
+      case "hi": return "/nandra/nandra-hi.png";
+      case "thinking": return "/nandra/nandra-full.png"; // the default image is now the thinking pose
+      case "laughing": return "/nandra/nandra-laughing.png";
+      default: return "/nandra/nandra-hi.png";
+    }
+  };
 
   return (
-    <div className="flex flex-col items-center gap-0 relative">
+    <div className="flex flex-col items-center gap-3">
       {/* Speech bubble */}
-      <div className="relative mb-0 z-10">
-        <div
-          className="px-5 py-3 rounded-2xl rounded-bl-sm text-sm font-medium max-w-[260px] text-center leading-snug"
-          style={{
-            background: "rgba(201,168,76,0.12)",
-            border: "1px solid rgba(201,168,76,0.35)",
-            color: "#F5F0E8",
-          }}
-        >
-          {quip}
+      {!hideSpeech && pose === "hi" && mounted && (
+        <div className="relative">
+          <div
+            className="px-4 py-2 text-center"
+            style={{
+              background: "rgba(238,238,238,0.04)",
+              border: "1px solid rgba(238,238,238,0.12)",
+              borderRadius: "8px 8px 8px 2px",
+              fontFamily: "var(--font-inter)",
+              fontSize: "12px",
+              fontStyle: "italic",
+              color: "rgba(238,238,238,0.7)",
+              maxWidth: "260px",
+            }}
+          >
+            {quip}
+          </div>
+          {/* Triangle pointer */}
+          <div
+            className="absolute -bottom-2 left-1/2 -translate-x-1/2"
+            style={{
+              width: 0,
+              height: 0,
+              borderLeft: "6px solid transparent",
+              borderRight: "6px solid transparent",
+              borderTop: "8px solid rgba(238,238,238,0.12)",
+            }}
+          />
         </div>
-        {/* Bubble tail */}
-        <div
-          className="absolute -bottom-2 left-6 w-0 h-0"
-          style={{
-            borderLeft: "8px solid transparent",
-            borderRight: "8px solid transparent",
-            borderTop: "8px solid rgba(201,168,76,0.35)",
-          }}
-        />
-      </div>
+      )}
 
       {/* Character image */}
-      <div className="animate-float">
+      <div className="anim-nandra relative">
         <img
-          src="/nandra/nandra-full.png"
-          alt="NANDRA — your AI fashion critic"
-          className="w-52 h-72 object-contain object-bottom drop-shadow-2xl"
+          src={getImageSrc()}
+          alt={`NANDRA ${pose}`}
           style={{
-            filter: "drop-shadow(0 0 40px rgba(201,168,76,0.15))",
+            height: "clamp(300px, 45vh, 600px)",
+            width: "auto",
+            objectFit: "contain",
+            display: "block",
+            transition: "opacity 0.3s ease"
           }}
         />
-      </div>
-
-      {/* Name badge */}
-      <div className="mt-1 flex flex-col items-center gap-1">
-        <span
-          className="text-lg font-black tracking-[0.3em] uppercase"
-          style={{
-            background: "linear-gradient(90deg, #C9A84C, #f0d080, #C9A84C)",
-            backgroundSize: "200% auto",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            backgroundClip: "text",
-            animation: "shimmer 3s linear infinite",
-          }}
-        >
-          NANDRA
-        </span>
-        <span className="text-[10px] tracking-widest uppercase text-[rgba(245,240,232,0.3)] font-medium">
-          your most honest friend
-        </span>
       </div>
     </div>
   );

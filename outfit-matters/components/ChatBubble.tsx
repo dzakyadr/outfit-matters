@@ -4,18 +4,17 @@ import { useEffect, useRef, useState } from "react";
 
 interface ChatBubbleProps {
   text: string;
-  delay?: number;
-  label?: string;
+  role?: "nandra" | "user";
 }
 
-export default function ChatBubble({ text, delay = 0, label }: ChatBubbleProps) {
+export default function ChatBubble({ text, role = "nandra" }: ChatBubbleProps) {
   const [visible, setVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const timer = setTimeout(() => setVisible(true), delay);
-    return () => clearTimeout(timer);
-  }, [delay]);
+    const t = setTimeout(() => setVisible(true), 30);
+    return () => clearTimeout(t);
+  }, []);
 
   useEffect(() => {
     if (visible && ref.current) {
@@ -25,41 +24,66 @@ export default function ChatBubble({ text, delay = 0, label }: ChatBubbleProps) 
 
   if (!visible) return null;
 
-  return (
-    <div
-      ref={ref}
-      className="flex items-start gap-3 animate-fade-slide-up"
-    >
-      {/* Avatar */}
-      <div
-        className="w-8 h-8 rounded-full flex-shrink-0 overflow-hidden border border-[rgba(201,168,76,0.4)] mt-1"
-        style={{ background: "rgba(201,168,76,0.08)" }}
-      >
-        <img
-          src="/nandra/nandra-avatar.png"
-          alt="NANDRA"
-          className="w-full h-full object-cover"
-        />
-      </div>
+  const isNandra = role === "nandra";
 
-      {/* Bubble */}
-      <div className="flex flex-col gap-1 max-w-[85%]">
-        {label && (
-          <span className="text-xs font-semibold tracking-widest uppercase text-[#C9A84C] opacity-70 pl-1">
-            {label}
-          </span>
-        )}
+  if (!isNandra) {
+    return (
+      <div ref={ref} className="flex justify-end anim-chat" style={{ marginBottom: "14px" }}>
         <div
-          className="px-4 py-3 rounded-2xl rounded-tl-sm text-sm leading-relaxed"
           style={{
-            background: "rgba(245,240,232,0.04)",
-            border: "1px solid rgba(245,240,232,0.1)",
-            borderLeft: "3px solid #C9A84C",
-            color: "#F5F0E8",
+            maxWidth: "80%",
+            padding: "10px 14px",
+            background: "rgba(238,238,238,0.06)",
+            border: "1px solid rgba(238,238,238,0.12)",
+            borderRadius: "10px 10px 2px 10px",
+            fontFamily: "var(--font-inter)",
+            fontSize: "13px",
+            lineHeight: 1.75,
+            color: "rgba(238,238,238,0.85)",
           }}
         >
           {text}
         </div>
+      </div>
+    );
+  }
+
+  return (
+    <div ref={ref} className="flex items-start gap-3 anim-chat" style={{ marginBottom: "14px" }}>
+      {/* Avatar — letter N */}
+      <div
+        className="flex items-center justify-center flex-shrink-0"
+        style={{
+          width: 28,
+          height: 28,
+          borderRadius: "50%",
+          border: "1px solid rgba(238,238,238,0.15)",
+          background: "rgba(238,238,238,0.04)",
+          fontFamily: "var(--font-inter)",
+          fontSize: "10px",
+          fontWeight: 500,
+          color: "rgba(238,238,238,0.6)",
+          marginTop: 2,
+        }}
+      >
+        N
+      </div>
+
+      {/* Bubble */}
+      <div
+        style={{
+          maxWidth: "calc(100% - 40px)",
+          padding: "10px 14px",
+          background: "rgba(238,238,238,0.04)",
+          border: "1px solid rgba(238,238,238,0.1)",
+          borderRadius: "2px 10px 10px 10px",
+          fontFamily: "var(--font-inter)",
+          fontSize: "13px",
+          lineHeight: 1.75,
+          color: "rgba(238,238,238,0.85)",
+        }}
+      >
+        {text}
       </div>
     </div>
   );
