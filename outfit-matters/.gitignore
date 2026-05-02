@@ -44,4 +44,5 @@ next-env.d.ts
 .agent
 .agents
 
-.md
+AGENTS.md
+CLAUDE.md
